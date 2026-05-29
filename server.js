@@ -1,24 +1,27 @@
 const express = require("express");
+const path = require("path");
 
 const app = express();
 
+app.use(express.json());
+
+app.use(express.static("public"));
+
 app.get("/", (req, res) => {
-  res.json({
-    status: "running",
-    message: "AI Khmer Subtitle Server"
-  });
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.get("/subtitle", async (req, res) => {
-  const text = req.query.text || "";
+app.post("/subtitle", async (req, res) => {
 
-  // demo translate
+  const text = req.body.text || "";
+
   const khmer = "បកប្រែ: " + text;
 
   res.json({
     original: text,
     khmer: khmer
   });
+
 });
 
 const PORT = process.env.PORT || 3000;
