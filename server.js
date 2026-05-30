@@ -5,18 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const app = express();
 
 app.use(express.json());
-
-app.use(
-  express.static(
-    path.join(__dirname, "public")
-  )
-);
-
-console.log(
-  process.env.GEMINI_API_KEY
-    ? "GEMINI API KEY FOUND"
-    : "GEMINI API KEY MISSING"
-);
+app.use(express.static(path.join(__dirname, "public")));
 
 const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY
@@ -26,51 +15,27 @@ app.post("/translate", async (req, res) => {
   try {
     const { text } = req.body;
 
-    if (!text) {
-      return res.status(400).json({
-        error: "No text provided"
-      });
-    }
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash"
+    });
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-3.5-flash"
-      });
-
-    const prompt = `
-Translate the following subtitle to natural Khmer.
-
-Return ONLY Khmer text.
-
-${text}
-`;
-
-    const result =
-      await model.generateContent(prompt);
-
-    const translation =
-      result.response.text().trim();
+    const result = await model.generateContent(
+      `Translate to Khmer:\n${text}`
+    );
 
     res.json({
-      translation
+      translation: result.response.text()
     });
 
-  } catch (error) {
-
-    console.error(error);
-
+  } catch (err) {
     res.status(500).json({
-      error: error.message
+      error: err.message
     });
-
   }
 });
 
-const PORT =
-  process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
+  console.log(`Server running on ${PORT}`);
 });
