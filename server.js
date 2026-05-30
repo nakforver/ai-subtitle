@@ -1,12 +1,6 @@
 const express = require("express");
 const path = require("path");
-const multer = require("multer");
 const axios = require("axios");
-const FormData = require("form-data");
-const fs = require("fs");
-
-const { GoogleGenerativeAI } =
-require("@google/generative-ai");
 
 const app = express();
 
@@ -18,138 +12,136 @@ app.use(
   )
 );
 
-const upload = multer({
-  dest: "uploads/"
-});
-
-const genAI =
-new GoogleGenerativeAI(
+console.log("================================");
+console.log("SERVER STARTING...");
+console.log(
   process.env.GEMINI_API_KEY
+    ? "GEMINI_API_KEY FOUND"
+    : "GEMINI_API_KEY MISSING"
 );
+console.log("================================");
 
-app.post(
-"/generate-subtitle",
-upload.single("video"),
-async (req,res)=>{
+app.post("/translate", async (req, res) => {
 
-try{
+  try {
 
-if(!req.file){
-return res.status(400).json({
-error:"No video uploaded"
+    console.log("====== NEW REQUEST ======");
+
+    const { text } = req.body;
+
+    console.log("TEXT:", text);
+
+    if (!text) {
+      return res.status(400).json({
+        error: "No text provided"
+      });
+    }
+
+    const apiKey =
+      process.env.GEMINI_API_KEY;
+
+    console.log(
+      "API KEY EXISTS:",
+      !!apiKey
+    );
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error:
+          "GEMINI_API_KEY not found"
+      });
+    }
+
+    const response =
+      await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  text: `
+Translate to Khmer.
+
+Return ONLY Khmer text.
+
+${text}
+`
+                }
+              ]
+            }
+          ]
+        }
+      );
+
+    console.log(
+      "GOOGLE RESPONSE OK"
+    );
+
+    const translation =
+      response.data
+      .candidates[0]
+      .content.parts[0]
+      .text;
+
+    console.log(
+      "TRANSLATION:",
+      translation
+    );
+
+    res.json({
+      translation
+    });
+
+  } catch (error) {
+
+    console.log("====== ERROR ======");
+
+    if (error.response) {
+
+      console.log(
+        "STATUS:",
+        error.response.status
+      );
+
+      console.log(
+        "DATA:",
+        JSON.stringify(
+          error.response.data,
+          null,
+          2
+        )
+      );
+
+      return res.status(
+        error.response.status
+      ).json({
+        error:
+          error.response.data
+      });
+
+    }
+
+    console.log(
+      "MESSAGE:",
+      error.message
+    );
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
+
 });
-}
-
-const filePath = req.file.path;
-
-const formData = new FormData();
-
-formData.append(
-"file",
-fs.createReadStream(filePath)
-);
-
-formData.append(
-"model",
-"whisper-1"
-);
-
-const whisper =
-await axios.post(
-"https://api.openai.com/v1/audio/transcriptions",
-formData,
-{
-headers:{
-Authorization:
-`Bearer ${process.env.OPENAI_API_KEY}`,
-...formData.getHeaders()
-}
-}
-);
-
-const detectedText =
-whisper.data.text;
-
-const model =
-genAI.getGenerativeModel({
-model:"gemini-2.0-flash"
-});
-
-const prompt = `
-Translate this subtitle to natural Khmer.
-
-Return only Khmer text.
-
-${detectedText}
-`;
-
-const result =
-await model.generateContent(prompt);
-
-const khmer =
-result.response.text();
-
-fs.unlinkSync(filePath);
-
-res.json({
-detectedText,
-khmer
-});
-
-}catch(err){
-
-console.error(err);
-
-res.status(500).json({
-error:err.message
-});
-
-}
-
-}
-);
-
-app.post(
-"/translate",
-async(req,res)=>{
-
-try{
-
-const { text } = req.body;
-
-const model =
-genAI.getGenerativeModel({
-model:"gemini-2.0-flash"
-});
-
-const result =
-await model.generateContent(
-`Translate to Khmer:
-
-${text}`
-);
-
-res.json({
-translation:
-result.response.text()
-});
-
-}catch(err){
-
-res.status(500).json({
-error:err.message
-});
-
-}
-
-}
-);
 
 const PORT =
-process.env.PORT || 10000;
+  process.env.PORT || 10000;
 
-app.listen(PORT,()=>{
-console.log(
-`Server running on ${PORT}`
-);
+app.listen(PORT, () => {
+
+  console.log(
+    `Server running on port ${PORT}`
+  );
+
 });
