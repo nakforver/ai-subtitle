@@ -1,3 +1,6 @@
+const videoInput =
+document.getElementById("videoInput");
+
 const generateBtn =
 document.getElementById("generateBtn");
 
@@ -13,6 +16,20 @@ document.getElementById("khmerText");
 const status =
 document.getElementById("status");
 
+videoInput.addEventListener("change",()=>{
+
+const file =
+videoInput.files[0];
+
+if(file){
+
+status.innerHTML =
+"Selected: " + file.name;
+
+}
+
+});
+
 generateBtn.addEventListener(
 "click",
 async ()=>{
@@ -25,7 +42,7 @@ detectedText.value.trim();
 if(!text){
 
 status.innerHTML =
-"Please enter text";
+"Please enter subtitle text";
 
 return;
 
@@ -55,8 +72,7 @@ await response.json();
 if(!response.ok){
 
 status.innerHTML =
-data.error ||
-"Server Error";
+data.error;
 
 return;
 
@@ -90,16 +106,12 @@ khmerText.value;
 if(!text) return;
 
 const speech =
-new SpeechSynthesisUtterance(
-text
-);
+new SpeechSynthesisUtterance(text);
 
 speech.lang =
 "km-KH";
 
-speechSynthesis.speak(
-speech
-);
+speechSynthesis.speak(speech);
 
 }
 );
