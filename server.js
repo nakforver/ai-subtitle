@@ -7,106 +7,134 @@ const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  express.static(
+    path.join(__dirname, "public")
+  )
+);
 
 console.log("========== START ==========");
 console.log("Node Version:", process.version);
-console.log(
-  process.env.GEMINI_API_KEY
-    ? "✅ GEMINI_API_KEY FOUND"
-    : "❌ GEMINI_API_KEY MISSING"
-);
-console.log("===========================");
 
-let genAI = null;
-
-if (process.env.GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(
-    process.env.GEMINI_API_KEY
-  );
+if (!process.env.GEMINI_API_KEY) {
+  console.log("❌ GEMINI_API_KEY MISSING");
+} else {
+  console.log("✅ GEMINI_API_KEY FOUND");
 }
 
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    apiKey: !!process.env.GEMINI_API_KEY
-  });
-});
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
 
-app.post("/translate", async (req, res) => {
+app.post("/generate", async (req, res) => {
   try {
-    console.log("====== TRANSLATE REQUEST ======");
+
+    console.log("\n========== GENERATE ==========");
+
+    console.log(
+      "Time:",
+      new Date().toISOString()
+    );
+
+    console.log(
+      "Request Body:",
+      req.body
+    );
 
     const { text } = req.body;
 
-    console.log("Text:", text);
-
     if (!text) {
-      console.log("❌ No text");
+
+      console.log(
+        "❌ No text provided"
+      );
 
       return res.status(400).json({
+        success: false,
         error: "No text provided"
       });
+
     }
 
-    if (!genAI) {
-      console.log("❌ GEMINI_API_KEY missing");
-
-      return res.status(500).json({
-        error: "GEMINI_API_KEY missing"
-      });
-    }
-
-    console.log("Loading model...");
+    console.log(
+      "🚀 Sending request to Gemini..."
+    );
 
     const model =
       genAI.getGenerativeModel({
         model: "gemini-1.5-flash"
       });
 
-    console.log("Generating...");
+    const prompt = `
+Translate the following subtitle to natural Khmer.
+
+Return ONLY Khmer text.
+
+${text}
+`;
 
     const result =
       await model.generateContent(
-        `Translate to Khmer only:\n${text}`
+        prompt
       );
 
     const translation =
-      result.response.text();
+      result.response
+        .text()
+        .trim();
 
-    console.log("✅ Success");
+    console.log(
+      "✅ Translation Success"
+    );
+
+    console.log(
+      translation
+    );
 
     res.json({
+      success: true,
       translation
     });
 
   } catch (error) {
 
-    console.log("========== ERROR ==========");
-    console.log(error);
+    console.log(
+      "\n========== ERROR =========="
+    );
+
+    console.error(error);
+
+    console.log(
+      "Message:",
+      error.message
+    );
+
+    if (error.status) {
+      console.log(
+        "Status:",
+        error.status
+      );
+    }
 
     if (error.response) {
       console.log(
-        "Status:",
-        error.response.status
-      );
-
-      console.log(
-        "Data:",
+        "Response:",
         error.response.data
       );
     }
 
-    console.log("===========================");
-
     res.status(500).json({
-      error: error.message,
-      details: String(error)
+      success: false,
+      error:
+        error.message ||
+        "Server Error"
     });
+
   }
 });
 
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
+
   res.sendFile(
     path.join(
       __dirname,
@@ -114,13 +142,20 @@ app.get("*", (req, res) => {
       "index.html"
     )
   );
+
 });
 
 const PORT =
   process.env.PORT || 10000;
 
 app.listen(PORT, () => {
+
   console.log(
     `🚀 Server running on port ${PORT}`
   );
+
+  console.log(
+    "========== READY ==========\n"
+  );
+
 });
