@@ -1,14 +1,14 @@
-const videoInput =
-document.getElementById("videoInput");
+const videoFile =
+document.getElementById("videoFile");
 
-const generateBtn =
-document.getElementById("generateBtn");
+const fileName =
+document.getElementById("fileName");
 
-const speakBtn =
-document.getElementById("speakBtn");
+const translateBtn =
+document.getElementById("translateBtn");
 
-const detectedText =
-document.getElementById("detectedText");
+const englishText =
+document.getElementById("englishText");
 
 const khmerText =
 document.getElementById("khmerText");
@@ -16,45 +16,47 @@ document.getElementById("khmerText");
 const status =
 document.getElementById("status");
 
-videoInput.addEventListener("change",()=>{
+const speakBtn =
+document.getElementById("speakBtn");
 
-const file =
-videoInput.files[0];
+videoFile.addEventListener(
+"change",
+()=>{
 
-if(file){
+if(videoFile.files.length){
 
-status.innerHTML =
-"Selected: " + file.name;
+fileName.innerHTML =
+"✅ " +
+videoFile.files[0].name;
 
 }
 
-});
+}
+);
 
-generateBtn.addEventListener(
+translateBtn.addEventListener(
 "click",
 async ()=>{
 
-try{
-
 const text =
-detectedText.value.trim();
+englishText.value.trim();
 
 if(!text){
 
 status.innerHTML =
-"Please enter subtitle text";
+"Please enter text first";
 
 return;
 
 }
 
+try{
+
 status.innerHTML =
 "Translating...";
 
-const response =
-await fetch(
-"/generate",
-{
+const res =
+await fetch("/generate",{
 method:"POST",
 headers:{
 "Content-Type":
@@ -63,33 +65,32 @@ headers:{
 body:JSON.stringify({
 text
 })
-}
-);
+});
 
 const data =
-await response.json();
+await res.json();
 
-if(!response.ok){
-
-status.innerHTML =
-data.error;
-
-return;
-
-}
+if(data.success){
 
 khmerText.value =
 data.translation;
 
 status.innerHTML =
-"Done";
+"✅ Success";
+
+}else{
+
+status.innerHTML =
+data.error;
+
+}
 
 }catch(err){
 
 console.error(err);
 
 status.innerHTML =
-err.message;
+"Server Error";
 
 }
 
@@ -100,18 +101,16 @@ speakBtn.addEventListener(
 "click",
 ()=>{
 
-const text =
-khmerText.value;
-
-if(!text) return;
-
 const speech =
-new SpeechSynthesisUtterance(text);
+new SpeechSynthesisUtterance(
+khmerText.value
+);
 
-speech.lang =
-"km-KH";
+speech.lang="km-KH";
 
-speechSynthesis.speak(speech);
+speechSynthesis.speak(
+speech
+);
 
 }
 );
