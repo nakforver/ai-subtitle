@@ -1,11 +1,16 @@
 const express = require("express");
 const path = require("path");
+const multer = require("multer");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+const upload = multer({
+  dest: "uploads/"
+});
 
 console.log(
   process.env.GEMINI_API_KEY
@@ -19,6 +24,7 @@ const genAI = new GoogleGenerativeAI(
 
 app.post("/translate", async (req, res) => {
   try {
+
     const { text } = req.body;
 
     if (!text) {
@@ -27,9 +33,10 @@ app.post("/translate", async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.5-flash"
-    });
+    const model =
+      genAI.getGenerativeModel({
+        model: "gemini-3.5-flash"
+      });
 
     const prompt = `
 Translate the following English subtitle into natural Khmer.
@@ -40,7 +47,8 @@ Text:
 ${text}
 `;
 
-    const result = await model.generateContent(prompt);
+    const result =
+      await model.generateContent(prompt);
 
     const translation =
       result.response.text().trim();
@@ -51,7 +59,7 @@ ${text}
 
   } catch (error) {
 
-    console.error("GEMINI ERROR:", error);
+    console.error(error);
 
     res.status(500).json({
       error: error.message
@@ -59,8 +67,40 @@ ${text}
   }
 });
 
-const PORT = process.env.PORT || 10000;
+app.post(
+  "/upload",
+  upload.single("media"),
+  async (req, res) => {
+
+    try {
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: "No file uploaded"
+        });
+      }
+
+      res.json({
+        success: true,
+        original: req.file.originalname,
+        filename: req.file.filename
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        error: error.message
+      });
+
+    }
+  }
+);
+
+const PORT =
+  process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });
