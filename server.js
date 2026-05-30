@@ -28,20 +28,19 @@ app.post("/translate", async (req, res) => {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
+      model: "gemini-2.0-flash"
     });
 
     const prompt = `
-Translate this English subtitle to natural Khmer.
+Translate the following English subtitle into natural Khmer.
 
-Return ONLY the Khmer translation.
+Return ONLY Khmer text.
 
+Text:
 ${text}
 `;
 
-    const result = await model.generateContent(
-      prompt
-    );
+    const result = await model.generateContent(prompt);
 
     const translation =
       result.response.text().trim();
@@ -52,20 +51,16 @@ ${text}
 
   } catch (error) {
 
-    console.error("GEMINI ERROR:");
-    console.error(error);
+    console.error("GEMINI ERROR:", error);
 
     res.status(500).json({
       error: error.message
     });
-
   }
 });
 
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
+  console.log(`Server running on port ${PORT}`);
 });
