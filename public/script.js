@@ -1,7 +1,7 @@
 const btn =
-  document.getElementById(
-    "translateBtn"
-  );
+document.getElementById(
+  "translateBtn"
+);
 
 btn.addEventListener(
   "click",
@@ -12,20 +12,18 @@ btn.addEventListener(
         "englishText"
       ).value;
 
-    const output =
+    const result =
       document.getElementById(
         "result"
       );
 
     if (!text.trim()) {
-
-      output.innerText =
+      result.innerText =
         "Please enter text";
-
       return;
     }
 
-    output.innerText =
+    result.innerText =
       "Translating...";
 
     try {
@@ -48,83 +46,17 @@ btn.addEventListener(
       const data =
         await response.json();
 
-      output.innerText =
+      result.innerText =
         data.translation ||
-        data.error ||
-        "No result";
+        data.error;
 
     } catch (error) {
 
-      output.innerText =
+      console.error(error);
+
+      result.innerText =
         "Connection Error";
-
     }
 
-});
-
-const uploadBtn =
-  document.getElementById(
-    "uploadBtn"
-  );
-
-uploadBtn.addEventListener(
-  "click",
-  async () => {
-
-    const file =
-      document.getElementById(
-        "mediaFile"
-      ).files[0];
-
-    if (!file) {
-
-      alert(
-        "Select MP3 or MP4 file"
-      );
-
-      return;
-    }
-
-    const formData =
-      new FormData();
-
-    formData.append(
-      "media",
-      file
-    );
-
-    document.getElementById(
-      "status"
-    ).innerText =
-      "Uploading...";
-
-    try {
-
-      const response =
-        await fetch(
-          "/upload",
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-      const data =
-        await response.json();
-
-      document.getElementById(
-        "status"
-      ).innerText =
-        "Uploaded: " +
-        data.original;
-
-    } catch (error) {
-
-      document.getElementById(
-        "status"
-      ).innerText =
-        "Upload Failed";
-
-    }
-
-});
+  }
+);
