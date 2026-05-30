@@ -1,62 +1,97 @@
-const btn =
-document.getElementById(
-  "translateBtn"
-);
+const translateBtn =
+document.getElementById("translateBtn");
 
-btn.addEventListener(
-  "click",
-  async () => {
+const micBtn =
+document.getElementById("micBtn");
+
+const speakBtn =
+document.getElementById("speakBtn");
+
+const input =
+document.getElementById("englishText");
+
+const result =
+document.getElementById("result");
+
+let khmerText = "";
+
+// Translate
+translateBtn.addEventListener(
+"click",
+async () => {
+
+  const text = input.value;
+
+  if (!text.trim()) return;
+
+  result.innerText = "Translating...";
+
+  const response = await fetch(
+    "/translate",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+        "application/json"
+      },
+      body: JSON.stringify({
+        text
+      })
+    }
+  );
+
+  const data =
+  await response.json();
+
+  khmerText =
+  data.translation;
+
+  result.innerText =
+  khmerText;
+});
+
+// Voice Input
+micBtn.addEventListener(
+"click",
+() => {
+
+  const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+  const recognition =
+  new SpeechRecognition();
+
+  recognition.lang = "en-US";
+
+  recognition.start();
+
+  recognition.onresult =
+  (event) => {
 
     const text =
-      document.getElementById(
-        "englishText"
-      ).value;
+    event.results[0][0]
+    .transcript;
 
-    const result =
-      document.getElementById(
-        "result"
-      );
+    input.value = text;
+  };
+});
 
-    if (!text.trim()) {
-      result.innerText =
-        "Please enter text";
-      return;
-    }
+// Khmer Voice Output
+speakBtn.addEventListener(
+"click",
+() => {
 
-    result.innerText =
-      "Translating...";
+  if (!khmerText) return;
 
-    try {
+  const speech =
+  new SpeechSynthesisUtterance(
+    khmerText
+  );
 
-      const response =
-        await fetch(
-          "/translate",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-              "application/json"
-            },
-            body: JSON.stringify({
-              text
-            })
-          }
-        );
+  speech.lang = "km-KH";
 
-      const data =
-        await response.json();
-
-      result.innerText =
-        data.translation ||
-        data.error;
-
-    } catch (error) {
-
-      console.error(error);
-
-      result.innerText =
-        "Connection Error";
-    }
-
-  }
-);
+  speechSynthesis.speak(
+    speech
+  );
+});
