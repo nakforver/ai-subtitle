@@ -2,8 +2,11 @@ const btn = document.getElementById("translateBtn");
 
 btn.addEventListener("click", async () => {
 
-    const text = document.getElementById("englishText").value;
-    const output = document.getElementById("result");
+    const text =
+      document.getElementById("englishText").value;
+
+    const output =
+      document.getElementById("result");
 
     if (!text.trim()) {
         output.innerText = "Please enter text";
@@ -20,18 +23,16 @@ btn.addEventListener("click", async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                text: text
+                text
             })
         });
 
         const data = await response.json();
 
-        console.log(data);
-
         output.innerText =
             data.translation ||
             data.error ||
-            "No translation returned";
+            "No result";
 
     } catch (error) {
 
@@ -39,5 +40,4 @@ btn.addEventListener("click", async () => {
 
         output.innerText = "Connection Error";
     }
-
 });
