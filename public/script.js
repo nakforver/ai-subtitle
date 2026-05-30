@@ -1,97 +1,68 @@
 const translateBtn =
 document.getElementById("translateBtn");
 
-const micBtn =
-document.getElementById("micBtn");
-
 const speakBtn =
 document.getElementById("speakBtn");
 
-const input =
-document.getElementById("englishText");
-
-const result =
-document.getElementById("result");
-
-let khmerText = "";
-
-// Translate
 translateBtn.addEventListener(
 "click",
-async () => {
+async ()=>{
 
-  const text = input.value;
+const text =
+document.getElementById(
+"englishText"
+).value;
 
-  if (!text.trim()) return;
+const result =
+document.getElementById(
+"result"
+);
 
-  result.innerText = "Translating...";
+if(!text.trim()) return;
 
-  const response = await fetch(
-    "/translate",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-        "application/json"
-      },
-      body: JSON.stringify({
-        text
-      })
-    }
-  );
+result.innerHTML =
+"Translating...";
 
-  const data =
-  await response.json();
-
-  khmerText =
-  data.translation;
-
-  result.innerText =
-  khmerText;
+const res =
+await fetch("/translate",{
+method:"POST",
+headers:{
+"Content-Type":
+"application/json"
+},
+body:JSON.stringify({
+text
+})
 });
 
-// Voice Input
-micBtn.addEventListener(
-"click",
-() => {
+const data =
+await res.json();
 
-  const SpeechRecognition =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
+result.innerHTML =
+data.translation;
 
-  const recognition =
-  new SpeechRecognition();
+}
+);
 
-  recognition.lang = "en-US";
-
-  recognition.start();
-
-  recognition.onresult =
-  (event) => {
-
-    const text =
-    event.results[0][0]
-    .transcript;
-
-    input.value = text;
-  };
-});
-
-// Khmer Voice Output
 speakBtn.addEventListener(
 "click",
-() => {
+()=>{
 
-  if (!khmerText) return;
+const text =
+document.getElementById(
+"result"
+).innerText;
 
-  const speech =
-  new SpeechSynthesisUtterance(
-    khmerText
-  );
+const speech =
+new SpeechSynthesisUtterance(
+text
+);
 
-  speech.lang = "km-KH";
+speech.lang="km-KH";
 
-  speechSynthesis.speak(
-    speech
-  );
-});
+speechSynthesis.speak(
+speech
+);
+
+}
+);
