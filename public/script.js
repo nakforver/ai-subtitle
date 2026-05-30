@@ -1,8 +1,8 @@
-const videoInput =
-document.getElementById("videoInput");
-
 const generateBtn =
 document.getElementById("generateBtn");
+
+const speakBtn =
+document.getElementById("speakBtn");
 
 const status =
 document.getElementById("status");
@@ -13,112 +13,128 @@ document.getElementById("detectedText");
 const khmerText =
 document.getElementById("khmerText");
 
-videoInput.addEventListener("change", () => {
+const videoInput =
+document.getElementById("videoInput");
 
-  const file = videoInput.files[0];
+/* Video Select */
 
-  if(file){
-    status.innerText =
-      "Selected: " + file.name;
-  }
+if (videoInput) {
 
-});
+  videoInput.addEventListener(
+    "change",
+    () => {
+
+      const file =
+      videoInput.files[0];
+
+      if (file) {
+
+        status.innerHTML =
+          "Selected: " +
+          file.name;
+
+      }
+
+    }
+  );
+
+}
+
+/* Generate */
 
 generateBtn.addEventListener(
-"click",
-async ()=>{
+  "click",
+  async () => {
 
-try{
+    try {
 
-const file =
-videoInput.files[0];
+      status.innerHTML =
+        "Generating...";
 
-if(!file){
+      const text =
+        detectedText.value.trim();
 
-status.innerText =
-"Please select video";
+      if (!text) {
 
-return;
+        status.innerHTML =
+          "Please enter text first";
 
-}
+        return;
+      }
 
-status.innerText =
-"Uploading...";
+      const response =
+        await fetch(
+          "/generate",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+              "application/json"
+            },
+            body: JSON.stringify({
+              text
+            })
+          }
+        );
 
-const formData =
-new FormData();
+      const data =
+        await response.json();
 
-formData.append(
-"video",
-file
+      console.log(data);
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          "Server Error"
+        );
+
+      }
+
+      khmerText.value =
+        data.translation || "";
+
+      status.innerHTML =
+        "Done";
+
+    } catch (err) {
+
+      console.error(err);
+
+      status.innerHTML =
+        err.message;
+
+    }
+
+  }
 );
 
-const response =
-await fetch(
-"/generate-subtitle",
-{
-method:"POST",
-body:formData
-}
-);
+/* Speak Khmer */
 
-const data =
-await response.json();
+if (speakBtn) {
 
-if(data.error){
+  speakBtn.addEventListener(
+    "click",
+    () => {
 
-status.innerText =
-data.error;
+      const text =
+        khmerText.value;
 
-return;
+      if (!text) return;
 
-}
+      const speech =
+        new SpeechSynthesisUtterance(
+          text
+        );
 
-detectedText.value =
-data.detectedText || "";
+      speech.lang =
+        "km-KH";
 
-khmerText.value =
-data.khmer || "";
+      speechSynthesis.speak(
+        speech
+      );
 
-status.innerText =
-"Done";
-
-}catch(err){
-
-console.error(err);
-
-status.innerText =
-"Server Error";
-
-}
-
-}
-);
-
-const speakBtn =
-document.getElementById(
-"speakBtn"
-);
-
-if(speakBtn){
-
-speakBtn.addEventListener(
-"click",
-()=>{
-
-const speech =
-new SpeechSynthesisUtterance(
-khmerText.value
-);
-
-speech.lang =
-"km-KH";
-
-speechSynthesis.speak(
-speech
-);
-
-}
-);
+    }
+  );
 
 }
