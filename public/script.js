@@ -1,29 +1,49 @@
-const btn =
-document.getElementById(
-"generateBtn"
-);
+const videoInput =
+document.getElementById("videoInput");
 
-btn.addEventListener(
+const generateBtn =
+document.getElementById("generateBtn");
+
+const status =
+document.getElementById("status");
+
+const detectedText =
+document.getElementById("detectedText");
+
+const khmerText =
+document.getElementById("khmerText");
+
+videoInput.addEventListener("change", () => {
+
+  const file = videoInput.files[0];
+
+  if(file){
+    status.innerText =
+      "Selected: " + file.name;
+  }
+
+});
+
+generateBtn.addEventListener(
 "click",
-async()=>{
+async ()=>{
+
+try{
 
 const file =
-document.getElementById(
-"videoInput"
-).files[0];
+videoInput.files[0];
 
 if(!file){
-alert("Choose video");
+
+status.innerText =
+"Please select video";
+
 return;
+
 }
 
-const result =
-document.getElementById(
-"status"
-);
-
-result.innerHTML =
-"Processing...";
+status.innerText =
+"Uploading...";
 
 const formData =
 new FormData();
@@ -33,7 +53,7 @@ formData.append(
 file
 );
 
-const res =
+const response =
 await fetch(
 "/generate-subtitle",
 {
@@ -43,20 +63,62 @@ body:formData
 );
 
 const data =
-await res.json();
+await response.json();
 
-document.getElementById(
-"detectedText"
-).value =
-data.detectedText;
+if(data.error){
 
-document.getElementById(
-"khmerText"
-).value =
-data.khmer;
+status.innerText =
+data.error;
 
-result.innerHTML =
+return;
+
+}
+
+detectedText.value =
+data.detectedText || "";
+
+khmerText.value =
+data.khmer || "";
+
+status.innerText =
 "Done";
+
+}catch(err){
+
+console.error(err);
+
+status.innerText =
+"Server Error";
+
+}
 
 }
 );
+
+const speakBtn =
+document.getElementById(
+"speakBtn"
+);
+
+if(speakBtn){
+
+speakBtn.addEventListener(
+"click",
+()=>{
+
+const speech =
+new SpeechSynthesisUtterance(
+khmerText.value
+);
+
+speech.lang =
+"km-KH";
+
+speechSynthesis.speak(
+speech
+);
+
+}
+);
+
+}
