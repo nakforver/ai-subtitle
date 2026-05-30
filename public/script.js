@@ -4,6 +4,9 @@ document.getElementById("translateBtn");
 const speakBtn =
 document.getElementById("speakBtn");
 
+const uploadBtn =
+document.getElementById("uploadBtn");
+
 translateBtn.addEventListener(
 "click",
 async ()=>{
@@ -30,16 +33,15 @@ headers:{
 "Content-Type":
 "application/json"
 },
-body:JSON.stringify({
-text
-})
+body:JSON.stringify({text})
 });
 
 const data =
 await res.json();
 
 result.innerHTML =
-data.translation;
+data.translation ||
+data.error;
 
 }
 );
@@ -58,10 +60,32 @@ new SpeechSynthesisUtterance(
 text
 );
 
-speech.lang="km-KH";
+speech.lang = "km-KH";
 
 speechSynthesis.speak(
 speech
+);
+
+}
+);
+
+uploadBtn.addEventListener(
+"click",
+()=>{
+
+const file =
+document.getElementById(
+"videoFile"
+).files[0];
+
+if(!file){
+alert("Choose a video first");
+return;
+}
+
+alert(
+"Video selected: " +
+file.name
 );
 
 }
