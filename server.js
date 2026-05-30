@@ -72,7 +72,7 @@ whisper.data.text;
 
 const model =
 genAI.getGenerativeModel({
-model:"gemini-3.1-flash"
+model:"gemini-2.0-flash"
 });
 
 const prompt = `
@@ -119,7 +119,7 @@ const { text } = req.body;
 
 const model =
 genAI.getGenerativeModel({
-model:"gemini-3.5-flash"
+model:"gemini-2.0-flash"
 });
 
 const result =
