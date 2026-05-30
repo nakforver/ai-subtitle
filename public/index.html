@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AI Khmer Subtitle</title>
 
 <style>
+
 body{
     background:#000;
     color:white;
@@ -16,52 +18,79 @@ body{
 
 h1{
     color:#00ff99;
-    margin-top:40px;
 }
 
 textarea{
-    width:80%;
+    width:90%;
     height:180px;
-    margin-top:20px;
-    font-size:24px;
+    font-size:22px;
     padding:15px;
 }
 
 button{
-    margin-top:20px;
     background:#00ff99;
     border:none;
-    padding:15px 40px;
-    font-size:28px;
-    border-radius:12px;
+    padding:15px 30px;
+    font-size:22px;
+    border-radius:10px;
     cursor:pointer;
+    margin-top:15px;
 }
 
 #result{
-    margin:30px auto;
-    width:80%;
-    min-height:120px;
+    width:90%;
+    margin:auto;
+    margin-top:20px;
     background:#222;
-    border-radius:15px;
     padding:20px;
-    font-size:28px;
+    border-radius:12px;
+    min-height:80px;
 }
+
+#status{
+    margin-top:20px;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <h1>AI Khmer Subtitle</h1>
 
-<h2>Type English subtitle:</h2>
+<h3>English → Khmer</h3>
 
-<textarea id="englishText"></textarea>
+<textarea
+id="englishText"
+placeholder="Type English subtitle..."
+></textarea>
 
 <br>
 
-<button id="translateBtn">Translate</button>
+<button id="translateBtn">
+Translate
+</button>
 
 <div id="result"></div>
+
+<hr>
+
+<h3>Upload Audio / Video</h3>
+
+<input
+type="file"
+id="mediaFile"
+accept="audio/*,video/*"
+/>
+
+<br>
+
+<button id="uploadBtn">
+Upload File
+</button>
+
+<div id="status"></div>
 
 <script src="script.js"></script>
 
