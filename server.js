@@ -7,7 +7,15 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+console.log(
+  process.env.GEMINI_API_KEY
+    ? "GEMINI API KEY FOUND"
+    : "GEMINI API KEY MISSING"
+);
+
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
 
 app.post("/translate", async (req, res) => {
   try {
@@ -25,29 +33,39 @@ app.post("/translate", async (req, res) => {
 
     const prompt = `
 Translate this English subtitle to natural Khmer.
+
 Return ONLY the Khmer translation.
 
 ${text}
 `;
 
-    const result = await model.generateContent(prompt);
-    const translation = result.response.text().trim();
+    const result = await model.generateContent(
+      prompt
+    );
+
+    const translation =
+      result.response.text().trim();
 
     res.json({
       translation
     });
 
   } catch (error) {
+
+    console.error("GEMINI ERROR:");
     console.error(error);
 
     res.status(500).json({
-      error: "Translation failed"
+      error: error.message
     });
+
   }
 });
 
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });
