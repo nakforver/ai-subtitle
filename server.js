@@ -1,30 +1,28 @@
-require("dotenv").config();
-
 const express = require("express");
-const cors = require("cors");
 const path = require("path");
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+app.post("/translate", (req, res) => {
+    const { text } = req.body;
 
-app.post("/translate", async (req, res) => {
-  const text = req.body.text;
+    if (!text) {
+        return res.status(400).json({
+            error: "No text provided"
+        });
+    }
 
-  res.json({
-    translation: "សួស្តី",
-  });
+    // Demo translation
+    res.json({
+        translation: "បកប្រែ៖ " + text
+    });
 });
 
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
