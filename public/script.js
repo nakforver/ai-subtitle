@@ -1,92 +1,62 @@
-const translateBtn =
-document.getElementById("translateBtn");
-
-const speakBtn =
-document.getElementById("speakBtn");
-
-const uploadBtn =
-document.getElementById("uploadBtn");
-
-translateBtn.addEventListener(
-"click",
-async ()=>{
-
-const text =
+const btn =
 document.getElementById(
-"englishText"
-).value;
+"generateBtn"
+);
+
+btn.addEventListener(
+"click",
+async()=>{
+
+const file =
+document.getElementById(
+"videoInput"
+).files[0];
+
+if(!file){
+alert("Choose video");
+return;
+}
 
 const result =
 document.getElementById(
-"result"
+"status"
 );
 
-if(!text.trim()) return;
-
 result.innerHTML =
-"Translating...";
+"Processing...";
+
+const formData =
+new FormData();
+
+formData.append(
+"video",
+file
+);
 
 const res =
-await fetch("/translate",{
+await fetch(
+"/generate-subtitle",
+{
 method:"POST",
-headers:{
-"Content-Type":
-"application/json"
-},
-body:JSON.stringify({text})
-});
+body:formData
+}
+);
 
 const data =
 await res.json();
 
+document.getElementById(
+"detectedText"
+).value =
+data.detectedText;
+
+document.getElementById(
+"khmerText"
+).value =
+data.khmer;
+
 result.innerHTML =
-data.translation ||
-data.error;
-
-}
-);
-
-speakBtn.addEventListener(
-"click",
-()=>{
-
-const text =
-document.getElementById(
-"result"
-).innerText;
-
-const speech =
-new SpeechSynthesisUtterance(
-text
-);
-
-speech.lang = "km-KH";
-
-speechSynthesis.speak(
-speech
-);
-
-}
-);
-
-uploadBtn.addEventListener(
-"click",
-()=>{
-
-const file =
-document.getElementById(
-"videoFile"
-).files[0];
-
-if(!file){
-alert("Choose a video first");
-return;
-}
-
-alert(
-"Video selected: " +
-file.name
-);
+"Done";
 
 }
 );
