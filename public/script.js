@@ -1,43 +1,32 @@
-document.addEventListener("DOMContentLoaded", () => {
+const btn = document.getElementById("translateBtn");
 
-    const btn = document.getElementById("translateBtn");
-    const input = document.getElementById("englishText");
-    const result = document.getElementById("result");
+btn.addEventListener("click", async () => {
+    const text = document.getElementById("inputText").value;
+    const output = document.getElementById("output");
 
-    btn.addEventListener("click", async () => {
+    if (!text.trim()) {
+        output.innerText = "Please enter text";
+        return;
+    }
 
-        const text = input.value.trim();
+    output.innerText = "Translating...";
 
-        if (!text) {
-            result.innerText = "Please enter text";
-            return;
-        }
+    try {
+        const response = await fetch("/translate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text })
+        });
 
-        result.innerText = "Translating...";
+        const data = await response.json();
 
-        try {
+        // IMPORTANT
+        output.innerText = data.translation;
 
-            const response = await fetch("/translate", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    text: text
-                })
-            });
-
-            const data = await response.json();
-
-            result.innerText = data.translation;
-
-        } catch (err) {
-
-            console.error(err);
-            result.innerText = "Server error";
-
-        }
-
-    });
-
+    } catch (error) {
+        console.error(error);
+        output.innerText = "Error";
+    }
 });
